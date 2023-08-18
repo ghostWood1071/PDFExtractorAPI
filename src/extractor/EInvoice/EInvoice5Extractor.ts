@@ -90,13 +90,13 @@ export class EInvoice5Extractor extends PdfExtractor {
     nextPos = this.getUntil(pageLines, nextPos, "Tên đơn vị:").nextPos;
     lineTmp = this.getUntil(pageLines, nextPos, "Mã số thuế:");
     nextPos = lineTmp.nextPos;
-    result.buyer.taxCode = this.getBehind(lineTmp.strResult, ":")
+    result.buyer.companyName = this.getBehind(lineTmp.strResult, ":")
       .replace(/\#/g, "")
       .trim();
 
     lineTmp = this.getUntil(pageLines, nextPos, "Địa chỉ:");
     nextPos = lineTmp.nextPos;
-    result.buyer.companyName = this.getBehind(lineTmp.strResult, ":")
+    result.buyer.taxCode = this.getBehind(lineTmp.strResult, ":")
       .replace(/\#/g, "")
       .replace(/ /g, "");
 
