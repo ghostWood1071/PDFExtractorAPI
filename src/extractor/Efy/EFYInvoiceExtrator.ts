@@ -1,8 +1,7 @@
-import { PageContent, PagePart, TableContent } from "../../models/model";
+import { PageContent, TableContent } from "../../models/model";
 import { PdfExtractor } from "../PDFExtractor";
 
 export class EFYInvoiceExtractor extends PdfExtractor {
-
   constructor(fileContent: any) {
     super(fileContent);
     this.docLines = this.getDocLines();
@@ -136,5 +135,4 @@ export class EFYInvoiceExtractor extends PdfExtractor {
 
     return result;
   }
-
 }

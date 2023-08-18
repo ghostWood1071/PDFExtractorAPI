@@ -156,5 +156,4 @@ export class ViettelInvoiceExtractor extends PdfExtractor {
 
     return result;
   }
-
 }

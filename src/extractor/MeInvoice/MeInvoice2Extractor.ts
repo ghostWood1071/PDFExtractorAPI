@@ -1,6 +1,6 @@
-import { PageContent, PagePart, TableContent } from "../../models/model";
-import { PdfExtractor } from "../PDFExtractor";
 import * as fs from "fs";
+import { PageContent, TableContent } from "../../models/model";
+import { PdfExtractor } from "../PDFExtractor";
 
 export class MeInvoice2Extractor extends PdfExtractor {
   // private docLines: Promise<any[] | null>;
@@ -10,7 +10,7 @@ export class MeInvoice2Extractor extends PdfExtractor {
     this.docLines = this.getDocLines();
   }
 
-  private processDate(dataStr: string): Date {    
+  private processDate(dataStr: string): Date {
     return new Date(
       dataStr
         .trim()
@@ -159,7 +159,6 @@ export class MeInvoice2Extractor extends PdfExtractor {
     let numStrRegex = /^\d[\#\.\,\d]*\d$/;
 
     for (nextPos; nextPos < pageLength; nextPos += 2) {
-
       if (numStrRegex.test(pageLines[nextPos].trim())) {
         break;
       }
@@ -209,5 +208,4 @@ export class MeInvoice2Extractor extends PdfExtractor {
 
     return result;
   }
-
 }

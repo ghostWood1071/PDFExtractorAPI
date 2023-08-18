@@ -1,8 +1,7 @@
-import { PageContent, PagePart, TableContent } from "../../models/model";
+import { PageContent, TableContent } from "../../models/model";
 import { PdfExtractor } from "../PDFExtractor";
 
 export class CyberLotusExtractor extends PdfExtractor {
-
   constructor(fileContent: any) {
     super(fileContent);
     this.docLines = this.getDocLines();
@@ -20,7 +19,7 @@ export class CyberLotusExtractor extends PdfExtractor {
     let renderText = (textContent: any) => {
       let lastY,
         text = "";
-    
+
       for (let item of textContent.items) {
         if (lastY == item.transform[5] || !lastY) {
           text += "#" + item.str;

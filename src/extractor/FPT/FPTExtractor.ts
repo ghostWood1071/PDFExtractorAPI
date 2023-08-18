@@ -1,4 +1,4 @@
-import { PageContent, PagePart, TableContent } from "../../models/model";
+import { PageContent, TableContent } from "../../models/model";
 import { PdfExtractor } from "../PDFExtractor";
 
 export class FPTExtractor extends PdfExtractor {
@@ -101,5 +101,4 @@ export class FPTExtractor extends PdfExtractor {
 
     return result;
   }
-
 }

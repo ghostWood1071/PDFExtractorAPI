@@ -1,4 +1,4 @@
-import { PageContent, PagePart, TableContent } from "../../models/model";
+import { PageContent, TableContent } from "../../models/model";
 import { PdfExtractor } from "../PDFExtractor";
 
 export class Viettel2Extractor extends PdfExtractor {
@@ -95,7 +95,7 @@ export class Viettel2Extractor extends PdfExtractor {
     }
   }
 
- protected override processPage(pageLines: string[]) {
+  protected override processPage(pageLines: string[]) {
     let result = new PageContent();
     let pageLenght = pageLines.length;
 
@@ -203,5 +203,4 @@ export class Viettel2Extractor extends PdfExtractor {
 
     return result;
   }
-
 }

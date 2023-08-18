@@ -1,8 +1,7 @@
-import { PageContent, PagePart, TableContent } from "../../models/model";
+import { PageContent, TableContent } from "../../models/model";
 import { PdfExtractor } from "../PDFExtractor";
 
 export class MeInvoice4Extractor extends PdfExtractor {
-
   constructor(fileName: string) {
     super(fileName);
     this.docLines = this.getDocLines();
@@ -88,16 +87,19 @@ export class MeInvoice4Extractor extends PdfExtractor {
     let lineTmp = this.getUntil(pageLines, nextPos, "Số#");
     nextPos = lineTmp.nextPos;
 
-    result.serial = this.getBehind(lineTmp.strResult
-      .replace("Ký hiệu", "")
-      .replace(/#/g, "")
-      .trim(), ":");
+    result.serial = this.getBehind(
+      lineTmp.strResult.replace("Ký hiệu", "").replace(/#/g, "").trim(),
+      ":"
+    );
 
     nextPos = this.getUntil(pageLines, 0, "Số#").nextPos;
     lineTmp = this.getUntil(pageLines, nextPos, "Ngày#");
     nextPos = lineTmp.nextPos;
 
-    result.no = this.getBehind(lineTmp.strResult.replace("Số#", "").replace(/#/g, "").trim(),":");
+    result.no = this.getBehind(
+      lineTmp.strResult.replace("Số#", "").replace(/#/g, "").trim(),
+      ":"
+    );
 
     nextPos = this.getUntil(pageLines, nextPos, "Ngày#").nextPos;
     result.date = this.processDate(pageLines[nextPos]);

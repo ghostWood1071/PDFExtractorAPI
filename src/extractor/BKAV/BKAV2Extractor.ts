@@ -1,8 +1,7 @@
-import { PageContent, PagePart, TableContent } from "../../models/model";
+import { PageContent, TableContent } from "../../models/model";
 import { PdfExtractor } from "../PDFExtractor";
 
 export class BKAV2Extractor extends PdfExtractor {
-
   constructor(fileName: string) {
     super(fileName);
     this.docLines = this.getDocLines();
@@ -195,5 +194,4 @@ export class BKAV2Extractor extends PdfExtractor {
 
     return result;
   }
-
 }

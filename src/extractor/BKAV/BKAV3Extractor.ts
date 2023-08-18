@@ -1,6 +1,6 @@
-import { PageContent, PagePart, TableContent } from "../../models/model";
-import { BKAV2Extractor } from "./BKAV2Extractor";
+import { PageContent, TableContent } from "../../models/model";
 import { PdfExtractor } from "../PDFExtractor";
+import { BKAV2Extractor } from "./BKAV2Extractor";
 
 export class BKAV3Extractor extends BKAV2Extractor {
   protected override processPage(pageLines: string[]) {
