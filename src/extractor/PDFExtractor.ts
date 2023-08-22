@@ -1,9 +1,9 @@
 import * as fs from "fs";
+import { invalid } from "moment";
 import { MethodNotImplementedError, PDFDocument, PDFPage } from "pdf-lib";
 import PdfParse from "pdf-parse";
-import { PageContent, TableContent } from "../models/model";
 import { EncodeDict } from "../config/encode-dict";
-import { invalid } from "moment";
+import { PageContent, TableContent } from "../models/model";
 
 export interface IExtractable {
   extractInfo(): any;
@@ -15,38 +15,39 @@ export interface IExtractable {
 
 export class PdfExtractor {
   protected fileContent: any;
-  private extracted: any; 
-  protected docLines!:Promise<any[] | null>;
-  private encodeRegex:RegExp;
-  protected encodeMap:Map<string, string>;
+  private extracted: any;
+  protected docLines!: Promise<any[] | null>;
+  private encodeRegex: RegExp;
+  protected encodeMap: Map<string, string>;
   private productCount: number = 1;
-  private infoCheck:RegExp = /[:\(\)\.\,]|[ÁÀẠÃẢẮẰẲẶẴẤẦẬẨẪĐÓÒỎỌÕÔỐỒỔỘỖƠỚỜỞỢỠĂƯỨỪỬỰỮÚÙỦỤŨÂÊẾỀỂỆỄÉÈẺẸẼÝỲỶỴỸÍÌỈỊĨ]/g;
+  private infoCheck: RegExp =
+    /[:\(\)\.\,]|[ÁÀẠÃẢẮẰẲẶẴẤẦẬẨẪĐÓÒỎỌÕÔỐỒỔỘỖƠỚỜỞỢỠĂƯỨỪỬỰỮÚÙỦỤŨÂÊẾỀỂỆỄÉÈẺẸẼÝỲỶỴỸÍÌỈỊĨ]/g;
   constructor(fileConent: any) {
     this.fileContent = fileConent;
     this.encodeRegex = this.getEncodeRegex(EncodeDict);
     this.encodeMap = this.getEncodeMap(EncodeDict);
   }
 
-  static async getInfo(fileContent: any):Promise<any>{
+  static async getInfo(fileContent: any): Promise<any> {
     let parser = await PdfParse(fileContent);
     return parser.info;
   }
 
-  static async getMetadata(fileContent: any):Promise<any>{
+  static async getMetadata(fileContent: any): Promise<any> {
     let parser = await PdfParse(fileContent);
     return parser.metadata;
   }
 
   private getEncodeRegex(dict: any) {
-    let arrKey:string[] = [];
-    for (let key in dict){
+    let arrKey: string[] = [];
+    for (let key in dict) {
       arrKey.push(key);
     }
     let rawStrRegex = arrKey.join("|");
     return new RegExp(rawStrRegex, "g");
   }
 
-  private getEncodeMap(object:any){
+  private getEncodeMap(object: any) {
     const map = new Map<string, string>();
     for (const key in object) {
       if (Object.prototype.hasOwnProperty.call(object, key)) {
@@ -57,83 +58,85 @@ export class PdfExtractor {
     return map;
   }
 
-  private removeEncoding(str: string){
+  private removeEncoding(str: string) {
     let allMatch = str.match(this.encodeRegex) || [];
-    for(let match of allMatch){
-      str = str.replace(new RegExp(match, "g"), this.encodeMap.get(match)||"");
+    for (let match of allMatch) {
+      str = str.replace(
+        new RegExp(match, "g"),
+        this.encodeMap.get(match) || ""
+      );
     }
     return str;
   }
 
-  private refactorTable(page: PageContent){
-    for(let row of page.table){
+  private refactorTable(page: PageContent) {
+    for (let row of page.table) {
       row.sort_order = this.productCount++;
       row.product_name = this.removeEncoding(row.product_name);
       row.unit = this.removeEncoding(row.unit);
     }
   }
 
-
-  protected getUntil(pageLines:string[], posPart: number, ending: string){
-    let result = "";
-    let pos = posPart;
-    for(let i=posPart; i<pageLines.length; i++){
-        if(pageLines[i] == ending || pageLines[i].startsWith(ending)){
-            pos = i;
-            break;
-        }
-        else
-            result = result + pageLines[i]+ " "
-    }
-    // result = this.getBehind(result.trim(), ":")
-    return {strResult: result, nextPos: pos};
-  }
-
-  protected getByFilter(pageLines:string[], posPart: number, endingCondition: (x:string)=>boolean){
+  protected getUntil(pageLines: string[], posPart: number, ending: string) {
     let result = "";
     let pos = posPart;
     for (let i = posPart; i < pageLines.length; i++) {
-        if (endingCondition(pageLines[i])) {
-          pos = i;
-          break;
-        } else result = result + pageLines[i] + " ";
-      }
+      if (pageLines[i] == ending || pageLines[i].startsWith(ending)) {
+        pos = i;
+        break;
+      } else result = result + pageLines[i] + " ";
+    }
+    // result = this.getBehind(result.trim(), ":")
     return { strResult: result, nextPos: pos };
-}
+  }
 
-  protected getBehind(input:string, split: string){
+  protected getByFilter(
+    pageLines: string[],
+    posPart: number,
+    endingCondition: (x: string) => boolean
+  ) {
+    let result = "";
+    let pos = posPart;
+    for (let i = posPart; i < pageLines.length; i++) {
+      if (endingCondition(pageLines[i])) {
+        pos = i;
+        break;
+      } else result = result + pageLines[i] + " ";
+    }
+    return { strResult: result, nextPos: pos };
+  }
+
+  protected getBehind(input: string, split: string) {
     return input.split(split)[1].trim();
   }
-  
-  protected renderPage(pageData:any): string {
-      //check documents https://mozilla.github.io/pdf.js/
-      let render_options = {
-          //replaces all occurrences of whitespace with standard spaces (0x20). The default value is `false`.
-          normalizeWhitespace: false,
-          //do not attempt to combine same line TextItem's. The default value is `false`.
-          disableCombineTextItems: false
-      }
 
-      let renderText = (textContent:any) => {
-        //fs.writeFileSync('lol.json', JSON.stringify(textContent));
-        let regex = /^[\d,.]+$/
-        let lastY, text = '';
-        for (let item of textContent.items) {
-            if (lastY == item.transform[5] || !lastY){
-                if(regex.test(item.str))
-                  text += "#"+item.str;
-                else 
-                  text +=  item.str;
-            }  
-            else{
-                text += '\n' + item.str;
-            }    
-            lastY = item.transform[5];
+  protected renderPage(pageData: any): string {
+    //check documents https://mozilla.github.io/pdf.js/
+    let render_options = {
+      //replaces all occurrences of whitespace with standard spaces (0x20). The default value is `false`.
+      normalizeWhitespace: false,
+      //do not attempt to combine same line TextItem's. The default value is `false`.
+      disableCombineTextItems: false,
+    };
+
+    let renderText = (textContent: any) => {
+      //fs.writeFileSync('lol.json', JSON.stringify(textContent));
+      let regex = /^[\d,.]+$/;
+      let lastY,
+        text = "";
+      for (let item of textContent.items) {
+        if (lastY == item.transform[5] || !lastY) {
+          if (regex.test(item.str)) text += "#" + item.str;
+          else text += item.str;
+        } else {
+          text += "\n" + item.str;
         }
-        return text;
+        lastY = item.transform[5];
       }
-  
-      return pageData.getTextContent(render_options).then(renderText);
+      return text;
+    };
+
+    return pageData.getTextContent(render_options).then(renderText);
   }
 
   protected async getDocLines() {
@@ -167,11 +170,13 @@ export class PdfExtractor {
 
   protected async getTextInPages(document: PDFDocument) {
     let pageText: string[] = [];
-   
+
     for (let pageNum = 0; pageNum < document.getPageCount(); pageNum++) {
       let pageBuff = await this.getPageBuffer(document, pageNum);
       if (!pageBuff) continue;
-      let parser = await PdfParse(pageBuff, {pagerender: await this.renderPage});
+      let parser = await PdfParse(pageBuff, {
+        pagerender: await this.renderPage,
+      });
       pageText.push(parser.text);
     }
     return pageText;
@@ -260,7 +265,7 @@ export class PdfExtractor {
     return null;
   }
 
-  protected processPage(pageLines: string[]):PageContent {
+  protected processPage(pageLines: string[]): PageContent {
     throw new Error("Method not implemented.");
   }
 
@@ -292,7 +297,7 @@ export class PdfExtractor {
     try {
       let data: any = this.extracted ? this.extracted : await this.extractPDF();
       let textArray = data.textPages;
-      for (let i = 0; i < textArray.length-1; i++) {
+      for (let i = 0; i < textArray.length - 1; i++) {
         await fs.writeFileSync(`${fileName}-${i}.txt`, textArray[i]);
       }
     } catch (e: any) {
@@ -300,48 +305,52 @@ export class PdfExtractor {
     }
   }
 
-  private checkInfo(data:PageContent){
-    if (data.date == null || 
-        isNaN(data.date.getTime()) ||
-        this.infoCheck.test(data.serial) || 
-        this.infoCheck.test(data.no) ||
-        data.no == ""||
-        data.serial == "")
-        {
-          throw new TypeError("next");        
-        }
+  private checkInfo(data: PageContent) {
+    if (
+      data.date == null ||
+      isNaN(data.date.getTime()) ||
+      this.infoCheck.test(data.serial) ||
+      this.infoCheck.test(data.no) ||
+      data.no == "" ||
+      data.serial == ""
+    ) {
+      throw new TypeError("next");
+    }
   }
-  
-  public async getResult() {    
+
+  public async getResult() {
     let pageLines = await this.docLines;
-    if (pageLines){
-          if(pageLines.length == 1){
-              let data = this.processPage(pageLines[0]);
-              this.checkInfo(data);
-              this.refactorTable(data);
-              if (data.table.length == 0)
-                throw new TypeError("Định dạng file không được hỗ trợ");
-              console.log("table count: "+data.table.length);
-              return data;
-          } else {
-              let result:PageContent =  this.processPage(pageLines[0]);
-              this.checkInfo(result);
-              for(let pageNum = 1; pageNum<pageLines.length; pageNum++){
-                  let tmpPage:PageContent = this.processPage(pageLines[pageNum]);
-                  result.exchange_rate = tmpPage.exchange_rate?tmpPage.exchange_rate:result.exchange_rate;
-                  result.vat_rate = tmpPage.vat_rate!=0||tmpPage.vat_rate!=null?tmpPage.vat_rate:result.vat_rate;
-                  result.table = result.table.concat(tmpPage.table);
-              }
-              this.refactorTable(result);
-              if(result.table.length == 0)
-                throw new TypeError("Định dạng file không được hỗ trợ");
-              console.log("table count: "+result.table.length);
-              return result;
-          }
+    if (pageLines) {
+      if (pageLines.length == 1) {
+        let data = this.processPage(pageLines[0]);
+        this.checkInfo(data);
+        this.refactorTable(data);
+        if (data.table.length == 0)
+          throw new TypeError("Định dạng file không được hỗ trợ");
+        console.log("table count: " + data.table.length);
+        return data;
+      } else {
+        let result: PageContent = this.processPage(pageLines[0]);
+        this.checkInfo(result);
+        for (let pageNum = 1; pageNum < pageLines.length; pageNum++) {
+          let tmpPage: PageContent = this.processPage(pageLines[pageNum]);
+          result.exchange_rate = tmpPage.exchange_rate
+            ? tmpPage.exchange_rate
+            : result.exchange_rate;
+          result.vat_rate =
+            tmpPage.vat_rate != 0 || tmpPage.vat_rate != null
+              ? tmpPage.vat_rate
+              : result.vat_rate;
+          result.table = result.table.concat(tmpPage.table);
+        }
+        this.refactorTable(result);
+        if (result.table.length == 0)
+          throw new TypeError("Định dạng file không được hỗ trợ");
+        console.log("table count: " + result.table.length);
+        return result;
       }
-      else {
-          throw new Error("Không thể đọc file PDF");
-      }
+    } else {
+      throw new Error("Không thể đọc file PDF");
+    }
   }
-  
 }

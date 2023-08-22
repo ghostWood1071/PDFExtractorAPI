@@ -9,6 +9,7 @@ import { EInvoice2Extractor } from "../extractor/EInvoice/EInvoice2Extractor";
 import { EInvoice3Extractor } from "../extractor/EInvoice/EInvoice3Extractor";
 import { EInvoice4Extractor } from "../extractor/EInvoice/EInvoice4Extractor";
 import { EInvoice5Extractor } from "../extractor/EInvoice/EInvoice5Extractor";
+import { EInvoice6Extractor } from "../extractor/EInvoice/EInvoice6Extractor";
 import { EInvoiceExtractor } from "../extractor/EInvoice/EInvoiceExtractor";
 import { EFYInvoiceExtractor } from "../extractor/Efy/EFYInvoiceExtrator";
 import { FPT2Extractor } from "../extractor/FPT/FPT2Extractor";
@@ -40,7 +41,7 @@ export const Extractors = {
   CYBERLOTUS: [CyberLotusExtractor, VNPT2Extractor],
   EFY: EFYInvoiceExtractor,
   EInvoice2: EInvoice2Extractor,
-  EInvoice3: EInvoice3Extractor,
+  EInvoice3: [EInvoice3Extractor, EInvoice6Extractor],
   EInvoice4: EInvoice4Extractor,
   EInvoice: EInvoiceExtractor,
   EInvoice5: EInvoice5Extractor,

@@ -2,7 +2,6 @@ import { PageContent, TableContent } from "../../models/model";
 import { PdfExtractor } from "../PDFExtractor";
 // Lux Share
 export class EInvoice2Extractor extends PdfExtractor {
-
   constructor(fileContent: any) {
     super(fileContent);
     this.docLines = this.getDocLines();
@@ -229,10 +228,9 @@ export class EInvoice2Extractor extends PdfExtractor {
         result.exchange_rate = +this.getBehind(
           pageLines[nextPos].replace(/\#/g, "").trim(),
           ":"
-        )
-          .split(" ")[0];
-          // .replace(/\./g, "")
-          // .replace(/\,/g, ".");
+        ).split(" ")[0];
+        // .replace(/\./g, "")
+        // .replace(/\,/g, ".");
         break;
       }
     }
@@ -240,4 +238,3 @@ export class EInvoice2Extractor extends PdfExtractor {
     return result;
   }
 }
-
